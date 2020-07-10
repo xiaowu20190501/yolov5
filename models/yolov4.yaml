@@ -1,0 +1,86 @@
+# parameters
+nc: 20  # number of classes
+depth_multiple: 1.0  # model depth multiple
+width_multiple: 1.0  # layer channel multiple
+
+# anchors
+anchors:
+  - [331,195, 226,326, 365,359]  
+  - [78,200, 178,179, 128,293] 
+  - [33,47, 50,107, 127,96]  
+
+# YOLOv4 backbone
+backbone:
+  [[-1, 1, Conv, [32, 3, 1]],   
+   [-1, 1, Conv, [64, 3, 2]],   
+   [-1, 1, BottleneckCSP, [64]],
+   [-1, 1, Conv, [128, 3, 2]],  
+   [-1, 2, BottleneckCSP, [128]],
+   [-1, 1, Conv, [256, 3, 2]],  
+   [-1, 8, BottleneckCSP, [256]],   # route
+   [-1, 1, Conv, [512, 3, 2]], 
+   [-1, 8, BottleneckCSP, [512]],   # route
+   [-1, 1, Conv, [1024, 3, 2]], 
+   [-1, 4, BottleneckCSP, [1024]],  # layer104
+
+   [-1, 1, Conv, [512, 1, 1]],  
+   [-1, 1, Conv, [1024, 3, 1]],   
+   [-1, 1, SPP, [512, [5, 9, 13]]],
+   [-1, 1, Conv, [1024, 3, 1]],  
+   [-1, 1, Conv, [512, 1, 1]],    # 15 route 
+
+  ]
+
+# YOLOv4 head
+head:
+  [[-1, 1, Conv, [256, 1, 1]],  
+   [-1, 1, nn.Upsample, [None, 2, 'nearest']],  # 17
+   [-10, 1, Conv, [256, 1, 1]], 
+   [[-1, 17], 1, Concat, [1]],   
+
+   [-1, 1, Conv, [256, 1, 1]],  # layer 122-126
+   [-1, 1, Conv, [512, 3, 1]],
+   [-1, 1, Conv, [256, 1, 1]],
+   [-1, 1, Conv, [512, 3, 1]],
+   [-1, 1, Conv, [256, 1, 1]],
+
+   [-1, 1, Conv, [128, 1, 1]],
+   [-1, 1, nn.Upsample, [None, 2, 'nearest']],  # 26
+   [-21, 1, Conv, [128, 1, 1]], 
+   [[-1, 26], 1, Concat, [1]], 
+
+   [-1, 1, Conv, [128, 1, 1]],  # layer132-136
+   [-1, 1, Conv, [256, 3, 1]],
+   [-1, 1, Conv, [128, 1, 1]],
+   [-1, 1, Conv, [256, 3, 1]],
+   [-1, 1, Conv, [128, 1, 1]],
+
+   [-1, 1, Conv, [256, 3, 1]],  # layer137
+   [-1, 1, nn.Conv2d, [na * (nc + 5), 1, 1]],  # layer138, yolo layer139
+   
+   [-3, 1, Conv, [256, 3, 2]],  # layer141
+   [[-1, 24], 1, Concat, [1]],  # layer142
+
+   [-1, 1, Conv, [256, 1, 1]],  # layer143-147
+   [-1, 1, Conv, [512, 3, 1]],
+   [-1, 1, Conv, [256, 1, 1]],
+   [-1, 1, Conv, [512, 3, 1]],
+   [-1, 1, Conv, [256, 1, 1]],
+
+   [-1, 1, Conv, [512, 3, 1]],  # layer148
+   [-1, 1, nn.Conv2d, [na * (nc + 5), 1, 1]],  # layer149, yolo layer150
+
+   [-3, 1, Conv, [512, 3, 2]],  # layer152
+   [[-1, 15], 1, Concat, [1]],  # layer153
+
+   [-1, 1, Conv, [512, 1, 1]],  # layer154-158
+   [-1, 1, Conv, [1024, 3, 1]],
+   [-1, 1, Conv, [512, 1, 1]],
+   [-1, 1, Conv, [1024, 3, 1]],
+   [-1, 1, Conv, [512, 1, 1]],
+
+   [-1, 1, Conv, [1024, 3, 1]],  # layer159
+   [-1, 1, nn.Conv2d, [na * (nc + 5), 1, 1]],  # layer160, yolo layer161
+
+   [[], 1, Detect, [nc, anchors]],  # Detect(P5, P4, P3)
+  ]
