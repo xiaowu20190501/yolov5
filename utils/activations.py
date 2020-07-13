@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.nn as nn
-
+from matplotlib import pyplot as plt
 
 # Swish ------------------------------------------------------------------------
 class SwishImplementation(torch.autograd.Function):
@@ -61,3 +61,12 @@ class Mish(nn.Module):  # https://github.com/digantamisra98/Mish
     @staticmethod
     def forward(x):
         return x * F.softplus(x).tanh()
+
+if __name__ == "__main__":
+    mish = Mish()
+    x = torch.linspace(-10,10,1000)
+    y = mish(x)
+
+    plt.plot(x,y)
+    plt.grid()
+    plt.show()
