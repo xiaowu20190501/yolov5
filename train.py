@@ -287,7 +287,7 @@ def train(hyp):
         scheduler.step()
 
         # mAP
-        ema.update_attr(model)
+        ema.update_attr(model, include=['md', 'nc', 'hyp', 'gr', 'names', 'stride'])
         final_epoch = epoch + 1 == epochs
         if not opt.notest or final_epoch:  # Calculate mAP
             results, maps, times = test.test(opt.data,
@@ -303,12 +303,12 @@ def train(hyp):
         with open(results_file, 'a') as f:
             f.write(s + '%10.4g' * 7 % results + '\n')  # P, R, mAP, F1, test_losses=(GIoU, obj, cls)
         if len(opt.name) and opt.bucket:
-            os.system('gsutil cp results.txt gs://%s/results/results%s.txt' % (opt.bucket, opt.name))
+            os.system('gsutil cp %s gs://%s/results/results%s.txt' % (results_file, opt.bucket, opt.name))
 
         # Tensorboard
         if tb_writer:
             tags = ['train/giou_loss', 'train/obj_loss', 'train/cls_loss',
-                    'metrics/precision', 'metrics/recall', 'metrics/mAP_0.5', 'metrics/F1',
+                    'metrics/precision', 'metrics/recall', 'metrics/mAP_0.5', 'metrics/mAP_0.5:0.95',
                     'val/giou_loss', 'val/obj_loss', 'val/cls_loss']
             for x, tag in zip(list(mloss[:-1]) + list(results), tags):
                 tb_writer.add_scalar(tag, x, epoch)
