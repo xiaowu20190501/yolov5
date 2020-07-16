@@ -11,17 +11,17 @@ anchors:
 
 # YOLOv4 backbone
 backbone:
-  [[-1, 1, Conv, [32, 3, 1]],   
-   [-1, 1, Conv, [64, 3, 2]],   
-   [-1, 1, BottleneckCSP, [64]],
-   [-1, 1, Conv, [128, 3, 2]],  
-   [-1, 2, BottleneckCSP, [128]],
-   [-1, 1, Conv, [256, 3, 2]],  
-   [-1, 8, BottleneckCSP, [256]],   # route
-   [-1, 1, Conv, [512, 3, 2]], 
-   [-1, 8, BottleneckCSP, [512]],   # route
-   [-1, 1, Conv, [1024, 3, 2]], 
-   [-1, 4, BottleneckCSP, [1024]],  # layer104
+  [[-1, 1, Conv, [32, 3, 1, True]],   
+   [-1, 1, Conv, [64, 3, 2, True]],   
+   [-1, 1, BottleneckCSP, [64, True]],
+   [-1, 1, Conv, [128, 3, 2, True]],  
+   [-1, 2, BottleneckCSP, [128, True]],
+   [-1, 1, Conv, [256, 3, 2, True]],  
+   [-1, 8, BottleneckCSP, [256, True]],   # route
+   [-1, 1, Conv, [512, 3, 2, True]], 
+   [-1, 8, BottleneckCSP, [512, True]],   # route
+   [-1, 1, Conv, [1024, 3, 2, True]], 
+   [-1, 4, BottleneckCSP, [1024, True]],  # layer104
 
    [-1, 1, Conv, [512, 1, 1]],  
    [-1, 1, Conv, [1024, 3, 1]],   

@@ -1,6 +1,7 @@
 # This file contains modules common to various models
 
 from utils.utils import * 
+
 from utils.activations import * 
 
 def autopad(k, p=None):  # kernel, padding
@@ -17,12 +18,12 @@ def DWConv(c1, c2, k=1, s=1, act=True):
 
 class Conv(nn.Module):
     # Standard convolution
-    def __init__(self, c1, c2, k=1, s=1, p=None, g=1, act=True, mish_act=False):  # ch_in, ch_out, kernel, stride, padding, groups
+    def __init__(self, c1, c2, k=1, s=1, mish_act=False, p=None, g=1, act=True):  # ch_in, ch_out, kernel, stride, padding, groups
         super(Conv, self).__init__()
         self.conv = nn.Conv2d(c1, c2, k, s, autopad(k, p), groups=g, bias=False)
         self.bn = nn.BatchNorm2d(c2)
         if mish_act:
-            self.act = Mish()
+            self.act = Mish() if act else nn.Identity()
         else:
             self.act = nn.LeakyReLU(0.1, inplace=True) if act else nn.Identity()
 
@@ -35,12 +36,12 @@ class Conv(nn.Module):
 
 class Bottleneck(nn.Module):
     # Standard bottleneck
-    # def __init__(self, c1, c2, shortcut=True, g=1, e=0.5):  # ch_in, ch_out, shortcut, groups, expansion, yolov5
-    def __init__(self, c1, c2, shortcut=True, g=1, e=1, mish_bottleneck=False):  # ch_in, ch_out, shortcut, groups, expansion, yolov4->res*n
+    def __init__(self, c1, c2, shortcut=True, g=1, e=0.5, mish_bottleneck=False):  # ch_in, ch_out, shortcut, groups, expansion, yolov5
+    # def __init__(self, c1, c2, shortcut=True, g=1, e=1, mish_bottleneck=False):  # ch_in, ch_out, shortcut, groups, expansion, yolov4->res*n
         super(Bottleneck, self).__init__()
         c_ = int(c2 * e)  # hidden channels
         self.cv1 = Conv(c1, c_, 1, 1, mish_act=mish_bottleneck)
-        self.cv2 = Conv(c_, c2, 3, 1, g=g, mish_act=mish_bottleneck)
+        self.cv2 = Conv(c_, c2, 3, 1, mish_act=mish_bottleneck, g=g)
         self.add = shortcut and c1 == c2
 
     def forward(self, x):
@@ -49,15 +50,17 @@ class Bottleneck(nn.Module):
 
 class BottleneckCSP(nn.Module):
     # CSP Bottleneck https://github.com/WongKinYiu/CrossStagePartialNetworks
-    def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5, mish_csp=False):  # ch_in, ch_out, number, shortcut, groups, expansion
+    # def __init__(self, c1, c2, n=1, shortcut=True, g=1, e=0.5):  # ch_in, ch_out, number, shortcut, groups, expansion
+    def __init__(self, c1, c2, n=1, mish_csp=False, shortcut=True, g=1, e=1.0):  # ch_in, ch_out, number, shortcut, groups, expansion, yolov4->res*n
         super(BottleneckCSP, self).__init__()
         c_ = int(c2 * e)  # hidden channels
-        self.cv1 = Conv(c1, c_, 1, 1, mish_act=mish_csp)
+        self.cv1 = Conv(c1, c_, 1, 1, mish_act=mish_csp)  
         self.cv2 = nn.Conv2d(c1, c_, 1, 1, bias=False)
         self.cv3 = nn.Conv2d(c_, c_, 1, 1, bias=False)
         self.cv4 = Conv(2 * c_, c2, 1, 1, mish_act=mish_csp)
         self.bn = nn.BatchNorm2d(2 * c_)  # applied to cat(cv2, cv3)
-        self.act = nn.LeakyReLU(0.1, inplace=True)
+        # self.act = nn.LeakyReLU(0.1, inplace=True)
+        self.act = Mish()
         self.m = nn.Sequential(*[Bottleneck(c_, c_, shortcut, g, e=1.0, mish_bottleneck=mish_csp) for _ in range(n)])
 
     def forward(self, x):

@@ -1,6 +1,7 @@
 import sys,os
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # __file__获取执行文件相对路径，整行为取上一级的上一级目录
-sys.path.append(BASE_DIR)
+# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # __file__获取执行文件相对路径，整行为取上一级的上一级目录
+# sys.path.append(BASE_DIR)
+sys.path.append('/home/aiden00/abwu_workspace/yolov5')
 
 import argparse
 
@@ -181,7 +182,6 @@ def parse_model(md, ch):  # model_dict, input_channels(3)
             #     c2 = int(ch[1] * ex ** e)
             # if m != Focus:
             c2 = make_divisible(c2 * gw, 8) if c2 != no else c2
-
             # Experimental
             # if i > 0 and args[0] != no:  # channel expansion factor
             #     ex = 1 + gw  # exponential (default 2.0)
@@ -215,16 +215,19 @@ def parse_model(md, ch):  # model_dict, input_channels(3)
     return nn.Sequential(*layers), sorted(save)
 
 # commands:
-# python yolo.py --cfg yolov4.yaml 
+# python yolo.py --cfg yolov4.yaml --device cpu
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='model.yaml')
-    parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--cfg', type=str, default='yolov4.yaml', help='model.yaml')
+    parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     opt = parser.parse_args()
     opt.cfg = check_file(opt.cfg)  # check file
     device = torch_utils.select_device(opt.device)
 
     # Create model
+    # import pdb
+    # pdb.set_trace()
+
     model = Model(opt.cfg).to(device)
     model.train()
 

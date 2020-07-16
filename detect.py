@@ -134,7 +134,7 @@ def detect(save_img=False):
     print('Done. (%.3fs)' % (time.time() - t0))
 
 # command:
-# python detect.py --weights /home/aiden00/abwu_workspace/yolov5s.pt --output /home/aiden00/abwu_workspace/yolov5_output 
+# python detect.py --weights /home/aiden00/abwu_workspace/yolov5s.pt --output /home/aiden00/abwu_workspace/yolov5_output --device 0
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='model.pt path(s)')

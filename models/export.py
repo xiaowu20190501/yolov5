@@ -3,7 +3,8 @@
 Usage:
     $ export PYTHONPATH="$PWD" && python models/export.py --weights ./weights/yolov5s.pt --img 640 --batch 1
 """
-
+import sys
+sys.path.append("/home/aiden00/abwu_workspace/yolov5")
 import argparse
 
 from models.common import *
